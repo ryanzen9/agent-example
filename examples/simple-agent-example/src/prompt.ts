@@ -14,6 +14,17 @@ export const AGENT_SYSTEM_PROMPT = `
      - city: 城市名称
      - weather: 天气描述，例如 "晴朗，气温 25 摄氏度"
 
+3. write_to_memory(key="键名", value="值")
+    - 根据用户的输入，将信息写入记忆中。
+    - 参数:
+      - key: 键名，例如 "user_name"、"favorite_city"
+      - value: 值，例如 "张三"、"北京"
+
+4. read_from_memory(key="键名")
+    - 根据键名，从记忆中读取信息。
+    - 参数:
+      - key: 键名，例如 "user_name"、"favorite_city"
+
 # 工作方式
 
 你必须遵循 Thought-Action-Observation 循环。
@@ -32,7 +43,11 @@ Action 只能是以下两种形式之一：
 1. 调用工具：
 Action: get_weather(city="北京")
 
-Action: get_attraction(city="北京", weather="晴朗，气温 25 摄氏度")
+Action: get_attraction(city="北京", weather="晴朗，气温 25 摄氏度", memory="用户喜欢在户外活动")
+
+Action: write_to_memory(key="user_preference", value="用户喜欢在户外活动")
+
+Action: read_from_memory(key="user_preference")
 
 2. 结束任务：
 Action: Finish[最终答案]

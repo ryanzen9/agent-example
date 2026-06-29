@@ -1,6 +1,7 @@
 import { tavily } from "@tavily/core";
 import dotenv from "dotenv";
 import z from "zod";
+import { readMemory, writeMemory } from "./memory";
 
 dotenv.config();
 
@@ -70,6 +71,7 @@ const get_weather = async (city: string): Promise<string> => {
 const get_attraction = async (
   city: string,
   weather: string,
+  memory: string,
 ): Promise<string> => {
   if (!city || !weather) {
     return "错误: get_attraction 缺少 city 或 weather 参数。";
@@ -79,7 +81,11 @@ const get_attraction = async (
     apiKey: process.env.TRAVILY_API_KEY || "",
   });
 
-  const query = `请根据城市 ${city} 和天气 ${weather}，推荐适合的旅游景点。并且给出推荐理由。`;
+  console.log(
+    `正在查询 ${city} 的旅游景点，天气: ${weather}，补充信息: ${memory}`,
+  );
+
+  const query = `请根据城市 ${city} 和天气 ${weather} 和补充信息 ${memory}，推荐适合的旅游景点。并且给出推荐理由。`;
 
   try {
     const response = await travilyClient.search(query, {
@@ -109,6 +115,28 @@ const get_attraction = async (
   }
 };
 
+// 写入记忆 Tool
+export const write_to_memory = (key: string, value: string): string => {
+  return writeMemory(key, value);
+};
+
+// 读取记忆 Tool
+export const read_from_memory = (key: string): string => {
+  if (!key) {
+    return "错误: read_from_memory 缺少 key 参数。";
+  }
+
+  try {
+    const value = readMemory(key);
+    if (value.startsWith("错误")) {
+      return value;
+    }
+    return `从记忆中读取到的信息: ${key} = ${value}`;
+  } catch (error) {
+    return `错误: 读取记忆时发生异常: ${formatError(error)}`;
+  }
+};
+
 export function isToolName(name: string): name is keyof typeof tools {
   return name in tools;
 }
@@ -116,4 +144,6 @@ export function isToolName(name: string): name is keyof typeof tools {
 export const tools = {
   get_weather: get_weather,
   get_attraction: get_attraction,
+  write_to_memory: write_to_memory,
+  read_from_memory: read_from_memory,
 };
